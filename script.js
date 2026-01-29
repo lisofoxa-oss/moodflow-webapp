@@ -220,10 +220,10 @@ class MoodFlowApp {
         
         this.chart = new Chart(ctx, {
             type: 'doughnut',
-             {
+            data: {  // ← БЫЛО ПРОПУЩЕНО СЛОВО "data:"
                 labels: labels,
                 datasets: [{
-                     data,
+                    data: data,  // ← ИСПРАВЛЕНО: было "data,"
                     backgroundColor: colors.map(c => c + '80'), // 50% прозрачность
                     borderColor: borderColors,
                     borderWidth: 2,
