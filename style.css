@@ -5,14 +5,12 @@
 
 /* ===== ГЛОБАЛЬНЫЕ СТИЛИ ===== */
 :root {
-    /* Мистическая тёмная палитра */
-    --background: hsl(240, 10%, 3.9%);
+    /* Более насыщенная мистика */
+    --background: hsl(240, 15%, 5%);
     --foreground: hsl(0, 0%, 98%);
-    --card: hsl(240, 10%, 3.9%);
-    --card-foreground: hsl(0, 0%, 98%);
-    --primary: hsl(262, 83%, 58%);
-    --primary-foreground: hsl(210, 40%, 98%);
-    --secondary: hsl(240, 3.7%, 15.9%);
+    --card: hsla(240, 15%, 8%, 0.8);
+    --primary: hsl(262, 90%, 65%);
+    --secondary: hsla(240, 10%, 18%, 0.9);
     --secondary-foreground: hsl(0, 0%, 98%);
     --muted: hsl(240, 3.7%, 15.9%);
     --muted-foreground: hsl(240, 5%, 64.9%);
@@ -861,3 +859,25 @@ body {
         min-width: auto;
     }
 }
+
+
+/* СЖАТИЕ ДЛЯ ВАУ-ЭФФЕКТА НА МОБИЛКЕ */
+.stats-grid { gap: 1rem; }
+.main-content { gap: 1.5rem; }
+.stat-card, .chart-section, .info-section { 
+    padding: 1.2rem !important; 
+    border-radius: 16px !important;
+}
+.header-content { gap: 1rem; }
+.main-title { 
+    font-size: 2.5rem !important; 
+    line-height: 1.1;
+}
+@media (max-width: 768px) {
+    .container { padding: 1rem 0.75rem !important; }
+    .main-title { font-size: 2rem !important; }
+    .stats-grid { gap: 0.75rem; }
+    .stat-value { font-size: 2.2rem !important; }
+    .mood-display { font-size: 2.8rem !important; }
+}
+
