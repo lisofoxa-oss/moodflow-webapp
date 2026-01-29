@@ -617,99 +617,57 @@ body {
 /* ===== ИСПРАВЛЕНИЕ ДЛЯ МОБИЛЬНЫХ ===== */
 @media (max-width: 768px) {
     .container {
-        padding: 1rem;
-        padding-bottom: 6rem; /* Больше места для нижних элементов */
-    }
-    
-    .main-title {
-        font-size: 2rem;
-    }
-    
-    .subtitle {
-        font-size: 0.9rem;
-    }
-    
-    .stats-grid {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-    }
-    
-    .stat-card {
-        padding: 1.25rem;
-    }
-    
-    .stat-value {
-        font-size: 2rem;
-    }
-    
-    .mood-display {
-        font-size: 2.5rem;
-    }
-    
-    .chart-section,
-    .info-section {
-        padding: 1.25rem;
-    }
-    
-    .chart-container {
-        height: 280px;
-        min-height: 250px;
-    }
-    
-    .main-content {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-    }
-    
-    .info-description {
-        font-size: 0.9rem;
-        line-height: 1.6;
-    }
-    
-    .comparison-item {
-        padding: 0.75rem;
-    }
-    
-    .telegram-button {
-        width: 100%;
-        justify-content: center;
-    }
-    
-    .header-actions {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.75rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .container {
         padding: 0.75rem;
         padding-bottom: 5rem;
     }
     
     .main-title {
-        font-size: 1.75rem;
+        font-size: 1.8rem;
+        margin-bottom: 0.25rem;
     }
     
     .subtitle {
-        font-size: 0.85rem;
+        font-size: 0.8rem;
     }
     
     .stats-grid {
         grid-template-columns: 1fr;
+        gap: 0.75rem;
     }
     
     .stat-card {
-        padding: 1rem;
+        padding: 0.8rem;
+        border-radius: 0.75rem;
+    }
+    
+    .stat-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+    }
+    
+    .stat-title {
+        font-size: 0.85rem;
+        margin-bottom: 0.5rem;
     }
     
     .stat-value {
         font-size: 1.75rem;
+        margin-bottom: 0.25rem;
     }
     
     .mood-display {
         font-size: 2rem;
+    }
+    
+    .stat-subtitle {
+        font-size: 0.75rem;
+    }
+    
+    .chart-section,
+    .info-section {
+        padding: 1rem;
+        border-radius: 0.75rem;
     }
     
     .chart-container {
@@ -717,17 +675,189 @@ body {
         min-height: 220px;
     }
     
-    .viewers-badge {
-        padding: 0.5rem 1rem;
-        font-size: 0.85rem;
+    .chart-title {
+        font-size: 1.1rem;
     }
     
-    .viewers-count {
+    .main-content {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    
+    .info-title {
+        font-size: 1.1rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .info-description {
+        font-size: 0.8rem;
+        line-height: 1.5;
+    }
+    
+    .comparison-section {
+        padding-top: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .comparison-title {
+        font-size: 0.85rem;
+        margin-bottom: 1rem;
+    }
+    
+    .comparison-item {
+        padding: 0.6rem;
+        border-radius: 8px;
+        margin-bottom: 0.6rem;
+    }
+    
+    .comparison-label {
+        font-size: 0.8rem;
+    }
+    
+    .comparison-value {
         font-size: 1rem;
     }
     
+    .telegram-button {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.9rem;
+        border-radius: 8px;
+    }
+    
+    .header-actions {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .viewers-badge {
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+    }
+    
+    .viewers-count {
+        font-size: 0.95rem;
+    }
+    
     .language-switcher .lang-btn {
-        padding: 0.5rem 1rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+    }
+    
+    .header-content {
+        gap: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0.5rem;
+        padding-bottom: 4rem;
+    }
+    
+    .main-title {
+        font-size: 1.5rem;
+    }
+    
+    .subtitle {
+        font-size: 0.75rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+    
+    .stat-card {
+        padding: 0.6rem;
+        border-radius: 0.5rem;
+    }
+    
+    .stat-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+    }
+    
+    .stat-title {
+        font-size: 0.75rem;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+    }
+    
+    .mood-display {
+        font-size: 1.75rem;
+    }
+    
+    .stat-subtitle {
+        font-size: 0.7rem;
+    }
+    
+    .chart-section,
+    .info-section {
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+    }
+    
+    .chart-container {
+        height: 200px;
+        min-height: 180px;
+    }
+    
+    .chart-title {
+        font-size: 1rem;
+    }
+    
+    .info-title {
+        font-size: 1rem;
+    }
+    
+    .info-description {
+        font-size: 0.75rem;
+    }
+    
+    .comparison-item {
+        padding: 0.5rem;
+        border-radius: 6px;
+    }
+    
+    .comparison-label {
+        font-size: 0.75rem;
+    }
+    
+    .comparison-value {
+        font-size: 0.9rem;
+    }
+    
+    .telegram-button {
+        padding: 0.6rem 1.2rem;
         font-size: 0.85rem;
+        border-radius: 6px;
+    }
+    
+    .viewers-badge {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.75rem;
+    }
+    
+    .viewers-count {
+        font-size: 0.9rem;
+    }
+    
+    .language-switcher .lang-btn {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.75rem;
+    }
+    
+    .header-content {
+        gap: 0.5rem;
+    }
+    
+    .title-section {
+        min-width: auto;
     }
 }
