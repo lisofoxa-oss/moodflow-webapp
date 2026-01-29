@@ -4,32 +4,35 @@
    ======================================== */
 
 /* ===== ГЛОБАЛЬНЫЕ СТИЛИ ===== */
+/* МОЯ ТЕМА - ЭФИРНЫЕ НАСТРОЕНИЯ */
 :root {
-    /* Более насыщенная мистика */
-    --background: hsl(240, 15%, 5%);
-    --foreground: hsl(0, 0%, 98%);
-    --card: hsla(240, 15%, 8%, 0.8);
-    --primary: hsl(262, 90%, 65%);
-    --secondary: hsla(240, 10%, 18%, 0.9);
-    --secondary-foreground: hsl(0, 0%, 98%);
-    --muted: hsl(240, 3.7%, 15.9%);
-    --muted-foreground: hsl(240, 5%, 64.9%);
-    --accent: hsl(262, 83%, 58%);
-    --accent-foreground: hsl(0, 0%, 98%);
-    --destructive: hsl(0, 62.8%, 30.6%);
-    --destructive-foreground: hsl(0, 0%, 98%);
-    --border: hsl(240, 3.7%, 15.9%);
-    --input: hsl(240, 3.7%, 15.9%);
-    --ring: hsl(240, 4.9%, 83.9%);
-    --radius: 1rem;
+    /* Основной светлый фон с космическим градиентом */
+    --background: hsl(210, 30%, 98%);
+    --foreground: hsl(220, 10%, 15%);
+    --card: hsla(0, 0%, 100%, 0.9);
+    --card-foreground: hsl(220, 10%, 15%);
+    
+    /* Эфирная палитра настроений */
+    --primary-happy: hsl(330, 80%, 65%);      /* Радость */
+    --primary-calm: hsl(200, 60%, 55%);       /* Спокойствие */
+    --primary-sad: hsl(220, 50%, 55%);        /* Грусть */
+    --primary-neutral: hsl(40, 60%, 60%);     /* Нейтральное */
+    --primary: hsl(280, 70%, 60%);           /* Акцент */
+    
+    --secondary: hsla(210, 20%, 92%, 0.8);
+    --muted: hsl(210, 20%, 85%);
+    --muted-foreground: hsl(220, 10%, 45%);
     
     /* Градиенты */
-    --gradient-primary: linear-gradient(135deg, hsl(262, 83%, 58%), hsl(225, 60%, 50%));
-    --gradient-secondary: linear-gradient(135deg, hsl(339, 49%, 30%, 0.3), hsl(225, 39%, 30%, 0.3));
-    --gradient-success: linear-gradient(135deg, hsl(142, 76%, 36%), hsl(150, 60%, 40%));
-    --gradient-warning: linear-gradient(135deg, hsl(48, 96%, 50%), hsl(35, 80%, 45%));
-    --gradient-error: linear-gradient(135deg, hsl(0, 62.8%, 30.6%), hsl(350, 70%, 35%));
+    --gradient-primary: linear-gradient(135deg, hsl(280, 70%, 60%), hsl(330, 80%, 65%))
+    --gradient-calm: linear-gradient(135deg, hsl(200, 60%, 55%), hsl(160, 60%, 60%))
+    --gradient-space: radial-gradient(circle at 20% 80%, hsla(200, 60%, 70%, 0.3), transparent 50%), 
+                      radial-gradient(circle at 80% 20%, hsla(330, 80%, 70%, 0.2), transparent 50%);
 }
+
+/* Фон body */
+
+
 
 * {
     margin: 0;
@@ -45,10 +48,7 @@ body {
     -moz-osx-font-smoothing: grayscale;
     
     background-color: var(--background);
-    background-image: 
-        radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
-        radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 0.3) 0, transparent 50%),
-        radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 0.3) 0, transparent 50%);
+background-image: var(--gradient-space);
     
     color: var(--foreground);
     min-height: 100vh;
