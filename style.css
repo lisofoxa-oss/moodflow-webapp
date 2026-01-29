@@ -4,35 +4,34 @@
    ======================================== */
 
 /* ===== ГЛОБАЛЬНЫЕ СТИЛИ ===== */
-/* МОЯ ТЕМА - ЭФИРНЫЕ НАСТРОЕНИЯ */
 :root {
-    /* Основной светлый фон с космическим градиентом */
-    --background: hsl(210, 30%, 98%);
-    --foreground: hsl(220, 10%, 15%);
-    --card: hsla(0, 0%, 100%, 0.9);
-    --card-foreground: hsl(220, 10%, 15%);
-    
-    /* Эфирная палитра настроений */
-    --primary-happy: hsl(330, 80%, 65%);      /* Радость */
-    --primary-calm: hsl(200, 60%, 55%);       /* Спокойствие */
-    --primary-sad: hsl(220, 50%, 55%);        /* Грусть */
-    --primary-neutral: hsl(40, 60%, 60%);     /* Нейтральное */
-    --primary: hsl(280, 70%, 60%);           /* Акцент */
-    
-    --secondary: hsla(210, 20%, 92%, 0.8);
-    --muted: hsl(210, 20%, 85%);
-    --muted-foreground: hsl(220, 10%, 45%);
+    /* Мистическая тёмная палитра */
+    --background: hsl(240, 10%, 3.9%);
+    --foreground: hsl(0, 0%, 98%);
+    --card: hsl(240, 10%, 3.9%);
+    --card-foreground: hsl(0, 0%, 98%);
+    --primary: hsl(262, 83%, 58%);
+    --primary-foreground: hsl(210, 40%, 98%);
+    --secondary: hsl(240, 3.7%, 15.9%);
+    --secondary-foreground: hsl(0, 0%, 98%);
+    --muted: hsl(240, 3.7%, 15.9%);
+    --muted-foreground: hsl(240, 5%, 64.9%);
+    --accent: hsl(262, 83%, 58%);
+    --accent-foreground: hsl(0, 0%, 98%);
+    --destructive: hsl(0, 62.8%, 30.6%);
+    --destructive-foreground: hsl(0, 0%, 98%);
+    --border: hsl(240, 3.7%, 15.9%);
+    --input: hsl(240, 3.7%, 15.9%);
+    --ring: hsl(240, 4.9%, 83.9%);
+    --radius: 1rem;
     
     /* Градиенты */
-    --gradient-primary: linear-gradient(135deg, hsl(280, 70%, 60%), hsl(330, 80%, 65%))
-    --gradient-calm: linear-gradient(135deg, hsl(200, 60%, 55%), hsl(160, 60%, 60%))
-    --gradient-space: radial-gradient(circle at 20% 80%, hsla(200, 60%, 70%, 0.3), transparent 50%), 
-                      radial-gradient(circle at 80% 20%, hsla(330, 80%, 70%, 0.2), transparent 50%);
+    --gradient-primary: linear-gradient(135deg, hsl(262, 83%, 58%), hsl(225, 60%, 50%));
+    --gradient-secondary: linear-gradient(135deg, hsl(339, 49%, 30%, 0.3), hsl(225, 39%, 30%, 0.3));
+    --gradient-success: linear-gradient(135deg, hsl(142, 76%, 36%), hsl(150, 60%, 40%));
+    --gradient-warning: linear-gradient(135deg, hsl(48, 96%, 50%), hsl(35, 80%, 45%));
+    --gradient-error: linear-gradient(135deg, hsl(0, 62.8%, 30.6%), hsl(350, 70%, 35%));
 }
-
-/* Фон body */
-
-
 
 * {
     margin: 0;
@@ -48,7 +47,10 @@ body {
     -moz-osx-font-smoothing: grayscale;
     
     background-color: var(--background);
-background-image: var(--gradient-space);
+    background-image: 
+        radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
+        radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 0.3) 0, transparent 50%),
+        radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 0.3) 0, transparent 50%);
     
     color: var(--foreground);
     min-height: 100vh;
@@ -93,6 +95,7 @@ background-image: var(--gradient-space);
     background-clip: text;
     position: relative;
     display: inline-block;
+    line-height: 1.1;
 }
 
 .main-title::after {
@@ -112,6 +115,7 @@ background-image: var(--gradient-space);
     font-size: 1.2rem;
     color: var(--muted-foreground);
     margin-top: 0.5rem;
+    line-height: 1.6;
 }
 
 .header-actions {
@@ -130,10 +134,18 @@ background-image: var(--gradient-space);
     background: rgba(102, 126, 234, 0.1);
     border: 1px solid rgba(102, 126, 234, 0.2);
     font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.viewers-badge:hover {
+    background: rgba(102, 126, 234, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
 }
 
 .viewers-badge svg {
     color: var(--primary);
+    flex-shrink: 0;
 }
 
 .viewers-count {
@@ -158,6 +170,9 @@ background-image: var(--gradient-space);
     font-weight: 600;
     font-size: 0.9rem;
     transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .language-switcher .lang-btn:hover {
@@ -194,6 +209,8 @@ background-image: var(--gradient-space);
     padding: 2rem;
     position: relative;
     overflow: hidden;
+    border-radius: var(--radius);
+    transition: all 0.3s ease;
 }
 
 .stat-card::before {
@@ -223,6 +240,7 @@ background-image: var(--gradient-space);
     margin-bottom: 1.5rem;
     position: relative;
     z-index: 1;
+    flex-shrink: 0;
 }
 
 .gradient-icon {
@@ -237,6 +255,7 @@ background-image: var(--gradient-space);
     font-weight: 600;
     position: relative;
     z-index: 1;
+    line-height: 1.4;
 }
 
 .stat-value {
@@ -249,6 +268,7 @@ background-image: var(--gradient-space);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    line-height: 1.1;
 }
 
 .mood-display {
@@ -266,6 +286,7 @@ background-image: var(--gradient-space);
     color: var(--muted-foreground);
     position: relative;
     z-index: 1;
+    line-height: 1.4;
 }
 
 .stat-subtitle-label {
@@ -306,6 +327,7 @@ background-image: var(--gradient-space);
 /* ===== CHART SECTION ===== */
 .chart-section {
     padding: 2rem;
+    border-radius: var(--radius);
 }
 
 .chart-header {
@@ -313,6 +335,8 @@ background-image: var(--gradient-space);
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
 }
 
 .chart-title {
@@ -322,12 +346,14 @@ background-image: var(--gradient-space);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    line-height: 1.2;
 }
 
 .chart-legend {
     display: flex;
     gap: 1.5rem;
     flex-wrap: wrap;
+    margin-top: 1rem;
 }
 
 .chart-legend-item {
@@ -336,12 +362,14 @@ background-image: var(--gradient-space);
     gap: 0.5rem;
     font-size: 0.85rem;
     color: var(--muted-foreground);
+    line-height: 1.4;
 }
 
 .chart-legend-color {
     width: 12px;
     height: 12px;
     border-radius: 50%;
+    flex-shrink: 0;
 }
 
 .chart-container {
@@ -355,6 +383,7 @@ background-image: var(--gradient-space);
     padding: 2rem;
     display: flex;
     flex-direction: column;
+    border-radius: var(--radius);
 }
 
 .info-header {
@@ -369,6 +398,7 @@ background-image: var(--gradient-space);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    line-height: 1.2;
 }
 
 .info-description {
@@ -391,6 +421,7 @@ background-image: var(--gradient-space);
     margin-bottom: 1.5rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
+    line-height: 1.4;
 }
 
 .comparison-item {
@@ -412,6 +443,7 @@ background-image: var(--gradient-space);
 .comparison-label {
     font-size: 0.9rem;
     color: var(--muted-foreground);
+    line-height: 1.4;
 }
 
 .comparison-value {
@@ -420,6 +452,7 @@ background-image: var(--gradient-space);
     gap: 0.75rem;
     font-size: 1.25rem;
     font-weight: 700;
+    line-height: 1.2;
 }
 
 .comparison-trend {
@@ -431,6 +464,7 @@ background-image: var(--gradient-space);
     font-size: 0.9rem;
     color: var(--muted-foreground);
     font-weight: 400;
+    line-height: 1.4;
 }
 
 /* ===== TELEGRAM BUTTON ===== */
@@ -443,6 +477,7 @@ background-image: var(--gradient-space);
 .telegram-button {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 0.75rem;
     padding: 1rem 2rem;
     background: linear-gradient(135deg, #0088cc, #00b5e2);
@@ -453,6 +488,7 @@ background-image: var(--gradient-space);
     font-size: 1rem;
     transition: all 0.3s ease;
     box-shadow: 0 6px 20px rgba(0, 136, 204, 0.4);
+    width: 100%;
 }
 
 .telegram-button:hover {
@@ -463,6 +499,7 @@ background-image: var(--gradient-space);
 
 .telegram-button svg {
     fill: white;
+    flex-shrink: 0;
 }
 
 /* ===== EMOJI RAIN ===== */
@@ -555,63 +592,6 @@ background-image: var(--gradient-space);
     background: hsl(var(--muted-foreground));
 }
 
-/* ===== RESPONSIVE ===== */
-@media (max-width: 768px) {
-    .container {
-        padding: 1rem;
-    }
-    
-    .main-title {
-        font-size: 2.5rem;
-    }
-    
-    .subtitle {
-        font-size: 1rem;
-    }
-    
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .main-content {
-        grid-template-columns: 1fr;
-    }
-    
-    .stat-value {
-        font-size: 2.5rem;
-    }
-    
-    .mood-display {
-        font-size: 3rem;
-    }
-    
-    .header-actions {
-        width: 100%;
-        justify-content: space-between;
-    }
-}
-
-@media (max-width: 480px) {
-    .main-title {
-        font-size: 2rem;
-    }
-    
-    .stat-card {
-        padding: 1.5rem;
-    }
-    
-    .stat-value {
-        font-size: 2rem;
-    }
-    
-    .mood-display {
-        font-size: 2.5rem;
-    }
-    
-    .chart-container {
-        height: 300px;
-    }
-}
 /* ========================================
    МОБИЛЬНЫЙ ДИЗАЙН - ВАУ ВЕРСИЯ
    ======================================== */
