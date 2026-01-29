@@ -5,7 +5,7 @@
 class MoodFlowApp {
     constructor() {
         // URL бэкенда (меняй на свой)
-        this.API_URL = 'https://moodflow-backend.lisofoxa-oss.repl.co'; // ЗАМЕНИ НА СВОЙ!
+        this.API_URL = 'moodflow-backend-production.up.railway.app'; // ЗАМЕНИ НА СВОЙ!
         this.WS_URL = this.API_URL.replace('http', 'ws');
         
         // Эмодзи и их данные
