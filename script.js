@@ -4,9 +4,9 @@
 
 class MoodFlowApp {
     constructor() {
-        // URL бэкенда (меняй на свой)
-        this.API_URL = 'moodflow-backend-production.up.railway.app'; // ЗАМЕНИ НА СВОЙ!
-        this.WS_URL = this.API_URL.replace('http', 'ws');
+        // URL бэкенда (полный, явно указанный)
+        this.API_URL = 'https://moodflow-backend-production.up.railway.app';
+        this.WS_URL = 'wss://moodflow-backend-production.up.railway.app';
         
         // Эмодзи и их данные
         this.emojis = {
