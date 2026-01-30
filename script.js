@@ -1,5 +1,5 @@
 /**
- * MoodFlow — Premium Frontend
+ * MoodFlow — Premium Frontend v2
  * Real-time global mood statistics
  */
 
@@ -9,13 +9,17 @@ class MoodFlow {
         this.API_URL = 'https://moodflow-backend-production.up.railway.app';
         this.WS_URL = 'wss://moodflow-backend-production.up.railway.app';
         
-        // Mood configuration
+        // Bot link for sharing
+        this.BOT_LINK = 'https://t.me/MoodFlowStatsBot';
+        this.WEB_APP_URL = 'https://moodflow-stats.netlify.app'; // Update with your actual URL
+        
+        // Mood configuration with happiness weights (0-100)
         this.moods = {
-            '😀': { label: { ru: 'Отличное', en: 'Great' }, color: '#10B981' },
-            '🙂': { label: { ru: 'Хорошее', en: 'Good' }, color: '#84CC16' },
-            '😐': { label: { ru: 'Нормальное', en: 'Neutral' }, color: '#F59E0B' },
-            '🙁': { label: { ru: 'Плохое', en: 'Bad' }, color: '#F97316' },
-            '😢': { label: { ru: 'Ужасное', en: 'Terrible' }, color: '#EF4444' }
+            '😀': { label: { ru: 'Отличное', en: 'Great' }, color: '#10B981', weight: 100 },
+            '🙂': { label: { ru: 'Хорошее', en: 'Good' }, color: '#84CC16', weight: 75 },
+            '😐': { label: { ru: 'Нормальное', en: 'Neutral' }, color: '#F59E0B', weight: 50 },
+            '🙁': { label: { ru: 'Плохое', en: 'Bad' }, color: '#F97316', weight: 25 },
+            '😢': { label: { ru: 'Ужасное', en: 'Terrible' }, color: '#EF4444', weight: 0 }
         };
         
         this.moodOrder = ['😀', '🙂', '😐', '🙁', '😢'];
@@ -33,16 +37,16 @@ class MoodFlow {
                 totalResponses: 'Всего ответов',
                 today: 'сегодня',
                 yesterday: 'Вчера',
-                trend: 'Тренд',
-                stable: 'стабильно',
-                growing: 'растёт',
-                declining: 'падает',
-                joinBot: 'Присоединиться к боту',
+                happinessIndex: 'Индекс счастья',
+                outOf100: 'из 100',
+                sharePrompt: 'Пригласи друзей поделиться настроением!',
+                shareInTelegram: 'Отправить в Telegram',
+                copyLink: 'Скопировать ссылку',
+                copied: 'Скопировано!',
                 footerText: 'Люди со всего мира делятся настроением каждый день',
                 loading: 'Загружаем настроения мира...',
                 newMood: 'Новое настроение!',
-                connected: 'Подключено',
-                disconnected: 'Переподключение...'
+                shareText: '🌍 Присоединяйся к MoodFlow! Отслеживай настроение мира в реальном времени и делись своим каждый день!'
             },
             en: {
                 tagline: 'Global mood pulse',
@@ -55,16 +59,16 @@ class MoodFlow {
                 totalResponses: 'Total Responses',
                 today: 'today',
                 yesterday: 'Yesterday',
-                trend: 'Trend',
-                stable: 'stable',
-                growing: 'growing',
-                declining: 'declining',
-                joinBot: 'Join the bot',
+                happinessIndex: 'Happiness Index',
+                outOf100: 'out of 100',
+                sharePrompt: 'Invite friends to share their mood!',
+                shareInTelegram: 'Share on Telegram',
+                copyLink: 'Copy link',
+                copied: 'Copied!',
                 footerText: 'People around the world share their mood every day',
                 loading: 'Loading world moods...',
                 newMood: 'New mood!',
-                connected: 'Connected',
-                disconnected: 'Reconnecting...'
+                shareText: '🌍 Join MoodFlow! Track the world\'s mood in real-time and share yours every day!'
             }
         };
         
@@ -76,6 +80,7 @@ class MoodFlow {
         this.wsReconnectTimeout = null;
         this.liveStreamEmojis = [];
         this.maxLiveEmojis = 8;
+        this.lastDistribution = null;
         
         this.init();
     }
@@ -89,6 +94,7 @@ class MoodFlow {
         // Setup event listeners
         this.setupThemeToggle();
         this.setupLanguageToggle();
+        this.setupShareButtons();
         
         // Load data and connect
         await this.loadStats();
@@ -121,6 +127,9 @@ class MoodFlow {
         this.lang = lang;
         localStorage.setItem('moodflow-lang', lang);
         
+        // Update HTML lang attribute for font switching
+        document.documentElement.setAttribute('lang', lang);
+        
         const t = this.i18n[lang];
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
@@ -140,6 +149,36 @@ class MoodFlow {
         btn?.addEventListener('click', () => {
             const newLang = this.lang === 'ru' ? 'en' : 'ru';
             this.applyLanguage(newLang);
+        });
+    }
+    
+    // === Share Buttons ===
+    setupShareButtons() {
+        // Telegram share
+        const telegramBtn = document.getElementById('share-telegram');
+        telegramBtn?.addEventListener('click', () => {
+            const text = encodeURIComponent(this.i18n[this.lang].shareText);
+            const url = encodeURIComponent(this.BOT_LINK);
+            window.open(`https://t.me/share/url?url=${url}&text=${text}`, '_blank');
+        });
+        
+        // Copy link
+        const copyBtn = document.getElementById('copy-link');
+        copyBtn?.addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(this.BOT_LINK);
+                copyBtn.classList.add('copied');
+                const span = copyBtn.querySelector('span');
+                const originalText = span.textContent;
+                span.textContent = this.i18n[this.lang].copied;
+                
+                setTimeout(() => {
+                    copyBtn.classList.remove('copied');
+                    span.textContent = originalText;
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy:', err);
+            }
         });
     }
     
@@ -261,10 +300,10 @@ class MoodFlow {
         if (today.distribution) {
             this.updateChart(today.distribution);
             this.lastDistribution = today.distribution;
+            
+            // Calculate and update happiness index
+            this.updateHappinessIndex(today.distribution);
         }
-        
-        // Trend
-        this.updateTrend(today, yesterday);
         
         // Last mood for live display
         if (today.lastResponse?.emoji) {
@@ -293,42 +332,41 @@ class MoodFlow {
         if (count) count.textContent = this.formatNumber(stats.count || 0);
     }
     
-    updateViewersCount(count) {
-        const el = document.getElementById('viewers-count');
-        if (el) {
-            el.textContent = count > 0 ? count : '—';
-            el.parentElement?.classList.toggle('has-viewers', count > 0);
-        }
-    }
-    
-    updateTrend(today, yesterday) {
-        const arrow = document.getElementById('trend-arrow');
-        const text = document.getElementById('trend-text');
-        const comparison = document.getElementById('today-vs-yesterday');
+    updateHappinessIndex(distribution) {
+        // Calculate weighted happiness index (0-100)
+        let totalWeight = 0;
+        let totalCount = 0;
         
-        const todayCount = today.count || 0;
-        const yesterdayCount = yesterday.count || 0;
-        const diff = todayCount - yesterdayCount;
-        
-        if (arrow && text) {
-            if (diff > 0) {
-                arrow.textContent = '↗';
-                arrow.className = 'trend-arrow up';
-                text.textContent = this.i18n[this.lang].growing;
-            } else if (diff < 0) {
-                arrow.textContent = '↘';
-                arrow.className = 'trend-arrow down';
-                text.textContent = this.i18n[this.lang].declining;
-            } else {
-                arrow.textContent = '→';
-                arrow.className = 'trend-arrow stable';
-                text.textContent = this.i18n[this.lang].stable;
+        for (const [emoji, count] of Object.entries(distribution)) {
+            if (this.moods[emoji] && count > 0) {
+                totalWeight += this.moods[emoji].weight * count;
+                totalCount += count;
             }
         }
         
-        if (comparison) {
-            const sign = diff > 0 ? '+' : '';
-            comparison.textContent = `${sign}${diff} vs ${this.i18n[this.lang].yesterday.toLowerCase()}`;
+        const index = totalCount > 0 ? Math.round(totalWeight / totalCount) : 50;
+        
+        const el = document.getElementById('happiness-index');
+        if (el) {
+            el.textContent = index;
+            
+            // Update gradient color based on index
+            const hue = (index / 100) * 120; // 0 = red, 120 = green
+            el.style.background = `linear-gradient(135deg, hsl(${hue}, 70%, 50%), hsl(${hue + 20}, 70%, 45%))`;
+            el.style.webkitBackgroundClip = 'text';
+            el.style.webkitTextFillColor = 'transparent';
+            el.style.backgroundClip = 'text';
+        }
+    }
+    
+    updateViewersCount(count) {
+        const el = document.getElementById('viewers-count');
+        const pill = document.getElementById('viewers-pill');
+        if (el) {
+            el.textContent = count > 0 ? count : '—';
+        }
+        if (pill) {
+            pill.classList.toggle('has-viewers', count > 0);
         }
     }
     
@@ -364,14 +402,15 @@ class MoodFlow {
                     backgroundColor: colors.map(c => c + 'CC'), // 80% opacity
                     borderColor: colors,
                     borderWidth: 3,
-                    hoverOffset: 8,
-                    hoverBorderWidth: 4
+                    hoverOffset: 12,
+                    hoverBorderWidth: 4,
+                    spacing: 2
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: true,
-                cutout: '70%',
+                cutout: '68%',
                 plugins: {
                     legend: { display: false },
                     tooltip: {
@@ -379,9 +418,10 @@ class MoodFlow {
                         backgroundColor: 'rgba(0, 0, 0, 0.85)',
                         titleColor: '#fff',
                         bodyColor: '#fff',
-                        padding: 12,
-                        cornerRadius: 8,
+                        padding: 14,
+                        cornerRadius: 12,
                         displayColors: true,
+                        boxPadding: 6,
                         callbacks: {
                             title: (items) => {
                                 const emoji = items[0]?.label || '';
@@ -421,7 +461,6 @@ class MoodFlow {
         
         legend.innerHTML = this.moodOrder.map(emoji => {
             const count = distribution[emoji] || 0;
-            const percent = total > 0 ? Math.round((count / total) * 100) : 0;
             const mood = this.moods[emoji];
             
             return `
@@ -448,8 +487,8 @@ class MoodFlow {
         // Show toast
         this.showToast(emoji);
         
-        // Refresh stats
-        this.loadStats();
+        // Refresh stats with small delay
+        setTimeout(() => this.loadStats(), 500);
     }
     
     setLiveEmoji(emoji) {

@@ -1,10 +1,13 @@
 /* ========================================
-   MOODFLOW — Premium Design System
+   MOODFLOW — Premium Design System v2
    ======================================== */
 
 /* === CSS Variables & Themes === */
 :root {
-    /* Typography */
+    /* Typography - Fredoka for EN, Comfortaa for RU (both rounded) */
+    --font-display-en: 'Fredoka', sans-serif;
+    --font-display-ru: 'Comfortaa', sans-serif;
+    --font-display: var(--font-display-ru);
     --font-main: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-mono: 'Space Mono', monospace;
     
@@ -19,12 +22,6 @@
     --transition-smooth: 300ms cubic-bezier(0.4, 0, 0.2, 1);
     --transition-bounce: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
     
-    /* Shadows */
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
-    --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.15);
-    --shadow-lg: 0 16px 64px rgba(0, 0, 0, 0.2);
-    --shadow-glow: 0 0 40px rgba(var(--accent-rgb), 0.3);
-    
     /* Emoji Colors */
     --emoji-great: #10B981;
     --emoji-good: #84CC16;
@@ -32,6 +29,10 @@
     --emoji-bad: #F97316;
     --emoji-terrible: #EF4444;
 }
+
+/* Font switch based on lang attribute */
+html[lang="en"] { --font-display: var(--font-display-en); }
+html[lang="ru"] { --font-display: var(--font-display-ru); }
 
 /* Dark Theme (Default) */
 [data-theme="dark"] {
@@ -50,41 +51,58 @@
     --accent-rgb: 167, 139, 250;
     --accent-hover: #c4b5fd;
     
-    --gradient-bg: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(120, 80, 200, 0.25), transparent),
-                   radial-gradient(ellipse 60% 40% at 100% 0%, rgba(59, 130, 246, 0.15), transparent),
-                   radial-gradient(ellipse 50% 30% at 0% 100%, rgba(236, 72, 153, 0.1), transparent);
+    --gradient-bg: 
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(120, 80, 200, 0.25), transparent),
+        radial-gradient(ellipse 60% 40% at 100% 0%, rgba(59, 130, 246, 0.15), transparent),
+        radial-gradient(ellipse 50% 30% at 0% 100%, rgba(236, 72, 153, 0.1), transparent);
     
     --glass-bg: rgba(255, 255, 255, 0.03);
     --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-shine: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+    
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 16px 64px rgba(0, 0, 0, 0.4);
+    --shadow-glow: 0 0 40px rgba(var(--accent-rgb), 0.3);
 }
 
-/* Light Theme */
+/* Light Theme — Elegant with soft gradients and glass */
 [data-theme="light"] {
-    --bg-primary: #fafafa;
+    --bg-primary: #f8fafc;
     --bg-secondary: #ffffff;
-    --bg-card: rgba(255, 255, 255, 0.9);
-    --bg-card-hover: rgba(255, 255, 255, 1);
-    --border-color: rgba(0, 0, 0, 0.08);
-    --border-hover: rgba(0, 0, 0, 0.15);
+    --bg-card: rgba(255, 255, 255, 0.55);
+    --bg-card-hover: rgba(255, 255, 255, 0.75);
+    --border-color: rgba(148, 163, 184, 0.25);
+    --border-hover: rgba(124, 58, 237, 0.3);
     
-    --text-primary: #1a1a2e;
-    --text-secondary: rgba(26, 26, 46, 0.7);
-    --text-muted: rgba(26, 26, 46, 0.4);
+    --text-primary: #1e293b;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
     
     --accent: #7c3aed;
     --accent-rgb: 124, 58, 237;
     --accent-hover: #6d28d9;
     
-    --gradient-bg: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(167, 139, 250, 0.2), transparent),
-                   radial-gradient(ellipse 60% 40% at 100% 0%, rgba(59, 130, 246, 0.1), transparent),
-                   radial-gradient(ellipse 50% 30% at 0% 100%, rgba(244, 114, 182, 0.1), transparent);
+    /* Soft dreamy gradient background */
+    --gradient-bg: 
+        radial-gradient(ellipse 120% 80% at 10% 0%, rgba(167, 139, 250, 0.25), transparent 50%),
+        radial-gradient(ellipse 80% 60% at 90% 10%, rgba(251, 191, 36, 0.18), transparent 50%),
+        radial-gradient(ellipse 70% 50% at 50% 100%, rgba(56, 189, 248, 0.15), transparent 50%),
+        radial-gradient(ellipse 50% 40% at 80% 80%, rgba(244, 114, 182, 0.12), transparent 50%),
+        linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 50%, #cbd5e1 100%);
     
-    --glass-bg: rgba(255, 255, 255, 0.7);
-    --glass-border: rgba(0, 0, 0, 0.06);
+    --glass-bg: rgba(255, 255, 255, 0.5);
+    --glass-border: rgba(255, 255, 255, 0.9);
+    --glass-shine: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
     
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.08);
-    --shadow-lg: 0 16px 64px rgba(0, 0, 0, 0.12);
+    --shadow-sm: 0 2px 8px rgba(148, 163, 184, 0.12), 0 1px 3px rgba(0,0,0,0.04);
+    --shadow-md: 0 8px 32px rgba(148, 163, 184, 0.18), 0 4px 12px rgba(0,0,0,0.05);
+    --shadow-lg: 0 16px 48px rgba(148, 163, 184, 0.22), 0 8px 24px rgba(0,0,0,0.06);
+    --shadow-glow: 0 0 40px rgba(var(--accent-rgb), 0.12);
+    
+    /* Extra light theme vars */
+    --card-gradient: linear-gradient(145deg, rgba(255,255,255,0.85) 0%, rgba(241,245,249,0.7) 100%);
+    --card-shine: inset 0 1px 1px rgba(255,255,255,0.9), inset 0 -1px 1px rgba(0,0,0,0.02);
 }
 
 /* === Base Reset === */
@@ -110,6 +128,11 @@ body {
     overflow-x: hidden;
 }
 
+/* Display font for headings */
+h1, h2, h3 {
+    font-family: var(--font-display);
+}
+
 /* === Background Effects === */
 .bg-gradient {
     position: fixed;
@@ -129,7 +152,41 @@ body {
 }
 
 [data-theme="light"] .bg-noise {
-    opacity: 0.02;
+    opacity: 0.012;
+}
+
+/* Floating orbs for light theme */
+[data-theme="light"] .bg-gradient::before,
+[data-theme="light"] .bg-gradient::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.6;
+    animation: float-orb 25s ease-in-out infinite;
+}
+
+[data-theme="light"] .bg-gradient::before {
+    width: 500px;
+    height: 500px;
+    background: linear-gradient(135deg, rgba(167, 139, 250, 0.35), rgba(56, 189, 248, 0.25));
+    top: -150px;
+    left: -150px;
+}
+
+[data-theme="light"] .bg-gradient::after {
+    width: 400px;
+    height: 400px;
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.3), rgba(244, 114, 182, 0.25));
+    bottom: -100px;
+    right: -100px;
+    animation-delay: -12s;
+}
+
+@keyframes float-orb {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(40px, -40px) scale(1.08); }
+    66% { transform: translate(-30px, 30px) scale(0.95); }
 }
 
 /* === App Container === */
@@ -152,12 +209,38 @@ body {
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     transition: all var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Glass shine effect */
+.glass::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: var(--glass-shine);
+    pointer-events: none;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 }
 
 .glass:hover {
     background: var(--bg-card-hover);
     border-color: var(--border-hover);
     box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+/* Light theme card enhancements */
+[data-theme="light"] .glass {
+    background: var(--card-gradient);
+    box-shadow: var(--shadow-sm), var(--card-shine);
+}
+
+[data-theme="light"] .glass:hover {
+    box-shadow: var(--shadow-md), var(--card-shine), var(--shadow-glow);
 }
 
 /* === Header === */
@@ -189,8 +272,8 @@ body {
 
 .logo-text h1 {
     font-size: 1.75rem;
-    font-weight: 800;
-    letter-spacing: -0.03em;
+    font-weight: 600;
+    letter-spacing: -0.01em;
     background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -249,10 +332,16 @@ body {
     font-size: 0.85rem;
     font-weight: 600;
     color: var(--text-secondary);
+    transition: all var(--transition-smooth);
 }
 
 .viewers-pill svg {
     opacity: 0.7;
+}
+
+.viewers-pill.has-viewers {
+    background: rgba(var(--accent-rgb), 0.1);
+    border-color: rgba(var(--accent-rgb), 0.3);
 }
 
 /* Theme Toggle */
@@ -322,11 +411,13 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1.5rem;
+    position: relative;
+    z-index: 1;
 }
 
 .chart-header h2 {
     font-size: 1.1rem;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--text-primary);
 }
 
@@ -343,6 +434,8 @@ body {
     display: flex;
     justify-content: center;
     padding: 1rem 0;
+    position: relative;
+    z-index: 1;
 }
 
 .chart-container {
@@ -363,9 +456,10 @@ body {
 .chart-total {
     display: block;
     font-size: 2.5rem;
-    font-weight: 800;
+    font-weight: 700;
     color: var(--text-primary);
     line-height: 1;
+    font-family: var(--font-display);
 }
 
 .chart-label {
@@ -383,6 +477,8 @@ body {
     margin-top: 1rem;
     padding-top: 1rem;
     border-top: 1px solid var(--border-color);
+    position: relative;
+    z-index: 1;
 }
 
 .legend-item {
@@ -430,6 +526,7 @@ body {
     padding: 1.25rem;
     display: flex;
     flex-direction: column;
+    position: relative;
 }
 
 .stat-card.live-card {
@@ -438,11 +535,17 @@ body {
     border-color: rgba(var(--accent-rgb), 0.2);
 }
 
+[data-theme="light"] .stat-card.live-card {
+    background: linear-gradient(135deg, rgba(255,255,255,0.75) 0%, rgba(var(--accent-rgb), 0.1) 100%);
+}
+
 .stat-header {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     margin-bottom: 0.75rem;
+    position: relative;
+    z-index: 1;
 }
 
 .stat-icon {
@@ -467,9 +570,11 @@ body {
 }
 
 .stat-value {
-    font-weight: 800;
+    font-weight: 700;
     line-height: 1;
     margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 1;
 }
 
 .stat-value.number {
@@ -486,9 +591,19 @@ body {
     font-size: 2.25rem;
 }
 
+/* Happiness Index coloring */
+.stat-value.happiness-index {
+    background: linear-gradient(135deg, var(--emoji-great), var(--emoji-good));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
 .stat-meta {
     font-size: 0.8rem;
     color: var(--text-muted);
+    position: relative;
+    z-index: 1;
 }
 
 /* Live Card Specific */
@@ -499,6 +614,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+    z-index: 1;
 }
 
 .waiting-text {
@@ -514,6 +631,8 @@ body {
     justify-content: center;
     margin-top: 0.75rem;
     min-height: 2rem;
+    position: relative;
+    z-index: 1;
 }
 
 .live-stream-emoji {
@@ -532,49 +651,6 @@ body {
     100% { transform: scale(1) rotate(0deg); opacity: 0.8; }
 }
 
-/* Trend Card */
-.trend-card {
-    grid-column: 1 / -1;
-}
-
-.trend-display {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
-}
-
-.trend-arrow {
-    font-size: 2rem;
-    transition: all var(--transition-smooth);
-}
-
-.trend-arrow.up {
-    color: var(--emoji-great);
-    transform: rotate(-45deg);
-}
-
-.trend-arrow.down {
-    color: var(--emoji-terrible);
-    transform: rotate(45deg);
-}
-
-.trend-arrow.stable {
-    color: var(--emoji-neutral);
-}
-
-.trend-text {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-}
-
-.trend-comparison {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    font-family: var(--font-mono);
-}
-
 /* === Footer === */
 .footer {
     margin-top: 2rem;
@@ -583,24 +659,74 @@ body {
     border-top: 1px solid var(--border-color);
 }
 
-.telegram-btn {
+.share-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.share-prompt {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-family: var(--font-display);
+}
+
+.share-buttons {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.share-btn {
     display: inline-flex;
     align-items: center;
     gap: 0.6rem;
     padding: 0.8rem 1.5rem;
-    background: linear-gradient(135deg, #0088cc 0%, #00aaee 100%);
-    color: white;
+    background: var(--glass-bg);
+    color: var(--text-primary);
     text-decoration: none;
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     font-weight: 600;
     font-size: 0.9rem;
+    cursor: pointer;
     transition: all var(--transition-smooth);
+    font-family: var(--font-main);
+}
+
+.share-btn:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--border-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.share-btn.telegram {
+    background: linear-gradient(135deg, #0088cc 0%, #00aaee 100%);
+    border-color: transparent;
+    color: white;
     box-shadow: 0 4px 20px rgba(0, 136, 204, 0.3);
 }
 
-.telegram-btn:hover {
-    transform: translateY(-2px);
+.share-btn.telegram:hover {
     box-shadow: 0 8px 30px rgba(0, 136, 204, 0.5);
+}
+
+.share-btn.copy {
+    background: var(--glass-bg);
+}
+
+.share-btn.copy.copied {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: rgba(16, 185, 129, 0.3);
+    color: #10B981;
+}
+
+.share-btn svg {
+    flex-shrink: 0;
 }
 
 .footer-text {
@@ -839,7 +965,7 @@ body {
         padding: 0.25rem 0.5rem;
     }
     
-    /* Stats - COMPACT on mobile */
+    /* Stats - 2x2 grid on mobile */
     .stats-section {
         grid-template-columns: 1fr 1fr;
         gap: 0.75rem;
@@ -850,8 +976,7 @@ body {
         border-radius: var(--radius-md);
     }
     
-    .stat-card.live-card,
-    .stat-card.trend-card {
+    .stat-card.live-card {
         grid-column: 1 / -1;
     }
     
@@ -893,22 +1018,24 @@ body {
         font-size: 1.25rem;
     }
     
-    /* Trend */
-    .trend-arrow {
-        font-size: 1.5rem;
-    }
-    
-    .trend-text {
-        font-size: 0.85rem;
-    }
-    
     /* Footer */
     .footer {
         margin-top: 1.5rem;
         padding: 1rem 0;
     }
     
-    .telegram-btn {
+    .share-prompt {
+        font-size: 0.9rem;
+    }
+    
+    .share-buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .share-btn {
+        width: 100%;
+        justify-content: center;
         padding: 0.7rem 1.25rem;
         font-size: 0.85rem;
     }
@@ -917,7 +1044,7 @@ body {
         font-size: 0.75rem;
     }
     
-    /* Toast - bottom center on mobile */
+    /* Toast */
     .toast-container {
         bottom: 1rem;
         right: 1rem;
@@ -950,15 +1077,6 @@ body {
     .chart-container {
         width: 220px;
         height: 220px;
-    }
-    
-    .stats-section {
-        grid-template-columns: 1fr;
-    }
-    
-    .stat-card.live-card,
-    .stat-card.trend-card {
-        grid-column: 1;
     }
 }
 
