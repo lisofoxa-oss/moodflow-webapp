@@ -253,7 +253,7 @@ class MoodFlow {
             this.emojiCursor.textContent = emoji;
             this.emojiCursor.style.opacity = '1';
             this.emojiCursor.style.left = `${e.clientX + 5}px`;
-            this.emojiCursor.style.top = `${e.clientY - 30}px`;
+            this.emojiCursor.style.top = `${e.clientY - 5}px`;
             
             // Hide default cursor on canvas
             e.target.style.cursor = 'none';
