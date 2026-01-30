@@ -11,7 +11,6 @@ class MoodFlow {
         
         // Bot link for sharing
         this.BOT_LINK = 'https://t.me/MoodFlowStatsBot';
-        this.WEB_APP_URL = 'https://moodflow-stats.netlify.app'; // Update with your actual URL
         
         // Mood configuration with happiness weights (0-100)
         this.moods = {
@@ -46,7 +45,8 @@ class MoodFlow {
                 footerText: 'Люди со всего мира делятся настроением каждый день',
                 loading: 'Загружаем настроения мира...',
                 newMood: 'Новое настроение!',
-                shareText: '🌍 Присоединяйся к MoodFlow! Отслеживай настроение мира в реальном времени и делись своим каждый день!'
+                shareText: '🌍 Присоединяйся к MoodFlow! Отслеживай настроение мира в реальном времени и делись своим каждый день!',
+                people: 'чел.'
             },
             en: {
                 tagline: 'Global mood pulse',
@@ -68,7 +68,8 @@ class MoodFlow {
                 footerText: 'People around the world share their mood every day',
                 loading: 'Loading world moods...',
                 newMood: 'New mood!',
-                shareText: '🌍 Join MoodFlow! Track the world\'s mood in real-time and share yours every day!'
+                shareText: '🌍 Join MoodFlow! Track the world\'s mood in real-time and share yours every day!',
+                people: 'people'
             }
         };
         
@@ -81,6 +82,7 @@ class MoodFlow {
         this.liveStreamEmojis = [];
         this.maxLiveEmojis = 8;
         this.lastDistribution = null;
+        this.hoveredSegment = null;
         
         this.init();
     }
@@ -95,6 +97,7 @@ class MoodFlow {
         this.setupThemeToggle();
         this.setupLanguageToggle();
         this.setupShareButtons();
+        this.setupChartInteraction();
         
         // Load data and connect
         await this.loadStats();
@@ -182,6 +185,168 @@ class MoodFlow {
         });
     }
     
+    // === Chart Interaction (Emoji cursor + popup) ===
+    setupChartInteraction() {
+        const canvas = document.getElementById('mood-chart');
+        if (!canvas) return;
+        
+        // Create emoji popup element
+        this.emojiPopup = document.createElement('div');
+        this.emojiPopup.className = 'emoji-popup';
+        this.emojiPopup.style.cssText = `
+            position: fixed;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s, transform 0.2s;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 12px 16px;
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            transform: translateY(10px);
+        `;
+        document.body.appendChild(this.emojiPopup);
+        
+        // Create custom cursor element
+        this.emojiCursor = document.createElement('div');
+        this.emojiCursor.className = 'emoji-cursor';
+        this.emojiCursor.style.cssText = `
+            position: fixed;
+            pointer-events: none;
+            font-size: 32px;
+            opacity: 0;
+            transition: opacity 0.15s;
+            z-index: 9999;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+            transform: translate(-50%, -50%);
+        `;
+        document.body.appendChild(this.emojiCursor);
+        
+        // Track mouse/touch on canvas
+        canvas.addEventListener('mousemove', (e) => this.handleChartHover(e));
+        canvas.addEventListener('mouseleave', () => this.hideEmojiCursor());
+        canvas.addEventListener('click', (e) => this.handleChartClick(e));
+        
+        // Touch support
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            this.handleChartClick({ clientX: touch.clientX, clientY: touch.clientY });
+        }, { passive: false });
+    }
+    
+    handleChartHover(e) {
+        if (!this.chart) return;
+        
+        const points = this.chart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, false);
+        
+        if (points.length > 0) {
+            const index = points[0].index;
+            const emoji = this.moodOrder[index];
+            
+            // Show emoji cursor
+            this.emojiCursor.textContent = emoji;
+            this.emojiCursor.style.opacity = '1';
+            this.emojiCursor.style.left = `${e.clientX}px`;
+            this.emojiCursor.style.top = `${e.clientY - 40}px`;
+            
+            // Hide default cursor on canvas
+            e.target.style.cursor = 'none';
+            
+            this.hoveredSegment = { index, emoji };
+        } else {
+            this.hideEmojiCursor();
+            e.target.style.cursor = 'pointer';
+            this.hoveredSegment = null;
+        }
+    }
+    
+    hideEmojiCursor() {
+        this.emojiCursor.style.opacity = '0';
+    }
+    
+    handleChartClick(e) {
+        if (!this.chart || !this.lastDistribution) return;
+        
+        const canvas = document.getElementById('mood-chart');
+        const rect = canvas.getBoundingClientRect();
+        
+        // Get click position relative to canvas
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        // Check which segment was clicked
+        const points = this.chart.getElementsAtEventForMode(
+            { native: { clientX: e.clientX, clientY: e.clientY }, x, y },
+            'nearest',
+            { intersect: true },
+            false
+        );
+        
+        if (points.length > 0) {
+            const index = points[0].index;
+            const emoji = this.moodOrder[index];
+            const count = this.lastDistribution[emoji] || 0;
+            const total = Object.values(this.lastDistribution).reduce((a, b) => a + b, 0);
+            const percent = total > 0 ? Math.round((count / total) * 100) : 0;
+            const mood = this.moods[emoji];
+            
+            // Show popup
+            this.showEmojiPopup(e.clientX, e.clientY, {
+                emoji,
+                label: mood.label[this.lang],
+                count,
+                percent,
+                color: mood.color
+            });
+        }
+    }
+    
+    showEmojiPopup(x, y, data) {
+        const t = this.i18n[this.lang];
+        
+        this.emojiPopup.innerHTML = `
+            <div style="font-size: 48px; line-height: 1;">${data.emoji}</div>
+            <div style="font-weight: 700; color: var(--text-primary); font-size: 14px;">${data.label}</div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <span style="font-size: 20px; font-weight: 800; color: ${data.color};">${data.percent}%</span>
+                <span style="font-size: 12px; color: var(--text-muted);">${data.count} ${t.people}</span>
+            </div>
+        `;
+        
+        // Position popup
+        const popupRect = this.emojiPopup.getBoundingClientRect();
+        let left = x - 60;
+        let top = y - 120;
+        
+        // Keep popup in viewport
+        if (left < 10) left = 10;
+        if (left + 120 > window.innerWidth) left = window.innerWidth - 130;
+        if (top < 10) top = y + 20;
+        
+        this.emojiPopup.style.left = `${left}px`;
+        this.emojiPopup.style.top = `${top}px`;
+        this.emojiPopup.style.opacity = '1';
+        this.emojiPopup.style.transform = 'translateY(0)';
+        
+        // Auto-hide after 2.5s
+        clearTimeout(this.popupTimeout);
+        this.popupTimeout = setTimeout(() => {
+            this.hideEmojiPopup();
+        }, 2500);
+    }
+    
+    hideEmojiPopup() {
+        this.emojiPopup.style.opacity = '0';
+        this.emojiPopup.style.transform = 'translateY(10px)';
+    }
+    
     // === Date ===
     setCurrentDate() {
         const now = new Date();
@@ -199,6 +364,12 @@ class MoodFlow {
             
             const data = await response.json();
             this.updateUI(data);
+            
+            // Update viewers from API response too
+            if (data.viewers !== undefined) {
+                this.updateViewersCount(data.viewers);
+            }
+            
             return data;
         } catch (error) {
             console.error('Failed to load stats:', error);
@@ -217,7 +388,6 @@ class MoodFlow {
                 console.log('✅ WebSocket connected');
                 clearTimeout(this.wsReconnectTimeout);
                 
-                // Register as viewer
                 this.ws.send(JSON.stringify({
                     type: 'viewer_joined',
                     timestamp: Date.now()
@@ -275,7 +445,6 @@ class MoodFlow {
                 break;
                 
             case 'welcome':
-                // Server sends viewer count on connect
                 if (data.viewers !== undefined) {
                     this.updateViewersCount(data.viewers);
                 }
@@ -290,35 +459,26 @@ class MoodFlow {
         const today = data.today || {};
         const yesterday = data.yesterday || {};
         
-        // Today stats
         this.updateTodayStats(today);
-        
-        // Yesterday stats
         this.updateYesterdayStats(yesterday);
         
-        // Chart
         if (today.distribution) {
             this.updateChart(today.distribution);
             this.lastDistribution = today.distribution;
-            
-            // Calculate and update happiness index
             this.updateHappinessIndex(today.distribution);
         }
         
-        // Last mood for live display
         if (today.lastResponse?.emoji) {
             this.setLiveEmoji(today.lastResponse.emoji);
         }
     }
     
     updateTodayStats(stats) {
-        // Top mood
         const topMood = document.getElementById('top-mood');
         const topPercent = document.getElementById('top-mood-percent');
         if (topMood) topMood.textContent = stats.mostCommonEmoji || '😐';
         if (topPercent) topPercent.textContent = stats.percentage || 0;
         
-        // Total responses
         const total = document.getElementById('total-responses');
         const chartTotal = document.getElementById('chart-total');
         if (total) total.textContent = this.formatNumber(stats.count || 0);
@@ -333,7 +493,6 @@ class MoodFlow {
     }
     
     updateHappinessIndex(distribution) {
-        // Calculate weighted happiness index (0-100)
         let totalWeight = 0;
         let totalCount = 0;
         
@@ -350,8 +509,7 @@ class MoodFlow {
         if (el) {
             el.textContent = index;
             
-            // Update gradient color based on index
-            const hue = (index / 100) * 120; // 0 = red, 120 = green
+            const hue = (index / 100) * 120;
             el.style.background = `linear-gradient(135deg, hsl(${hue}, 70%, 50%), hsl(${hue + 20}, 70%, 45%))`;
             el.style.webkitBackgroundClip = 'text';
             el.style.webkitTextFillColor = 'transparent';
@@ -375,7 +533,6 @@ class MoodFlow {
         const ctx = document.getElementById('mood-chart')?.getContext('2d');
         if (!ctx) return;
         
-        // Prepare data
         const labels = [];
         const data = [];
         const colors = [];
@@ -387,19 +544,17 @@ class MoodFlow {
             colors.push(this.moods[emoji].color);
         });
         
-        // Destroy old chart
         if (this.chart) {
             this.chart.destroy();
         }
         
-        // Create new chart
         this.chart = new Chart(ctx, {
             type: 'doughnut',
             data: {
                 labels: labels,
                 datasets: [{
                     data: data,
-                    backgroundColor: colors.map(c => c + 'CC'), // 80% opacity
+                    backgroundColor: colors.map(c => c + 'CC'),
                     borderColor: colors,
                     borderWidth: 3,
                     hoverOffset: 12,
@@ -413,28 +568,7 @@ class MoodFlow {
                 cutout: '68%',
                 plugins: {
                     legend: { display: false },
-                    tooltip: {
-                        enabled: true,
-                        backgroundColor: 'rgba(0, 0, 0, 0.85)',
-                        titleColor: '#fff',
-                        bodyColor: '#fff',
-                        padding: 14,
-                        cornerRadius: 12,
-                        displayColors: true,
-                        boxPadding: 6,
-                        callbacks: {
-                            title: (items) => {
-                                const emoji = items[0]?.label || '';
-                                const mood = this.moods[emoji];
-                                return mood ? mood.label[this.lang] : emoji;
-                            },
-                            label: (item) => {
-                                const total = item.dataset.data.reduce((a, b) => a + b, 0);
-                                const percent = total > 0 ? Math.round((item.raw / total) * 100) : 0;
-                                return ` ${item.raw} (${percent}%)`;
-                            }
-                        }
-                    }
+                    tooltip: { enabled: false } // Отключаем стандартный tooltip
                 },
                 animation: {
                     animateRotate: true,
@@ -445,19 +579,22 @@ class MoodFlow {
                 interaction: {
                     mode: 'nearest',
                     intersect: true
+                },
+                onHover: (event, elements) => {
+                    const canvas = event.native?.target;
+                    if (canvas) {
+                        canvas.style.cursor = elements.length > 0 ? 'none' : 'pointer';
+                    }
                 }
             }
         });
         
-        // Update legend
         this.updateChartLegend(distribution);
     }
     
     updateChartLegend(distribution) {
         const legend = document.getElementById('chart-legend');
         if (!legend) return;
-        
-        const total = Object.values(distribution).reduce((a, b) => a + b, 0);
         
         legend.innerHTML = this.moodOrder.map(emoji => {
             const count = distribution[emoji] || 0;
@@ -475,19 +612,10 @@ class MoodFlow {
     
     // === Live Updates ===
     onNewMood(emoji) {
-        // Update live emoji display
         this.setLiveEmoji(emoji);
-        
-        // Add to live stream
         this.addToLiveStream(emoji);
-        
-        // Create floating emoji
         this.createFloatingEmoji(emoji);
-        
-        // Show toast
         this.showToast(emoji);
-        
-        // Refresh stats with small delay
         setTimeout(() => this.loadStats(), 500);
     }
     
@@ -502,7 +630,6 @@ class MoodFlow {
         const stream = document.getElementById('live-stream');
         if (!stream) return;
         
-        // Add new emoji
         const span = document.createElement('span');
         span.className = 'live-stream-emoji';
         span.textContent = emoji;
@@ -510,12 +637,10 @@ class MoodFlow {
         
         this.liveStreamEmojis.unshift(span);
         
-        // Fade old emojis
         this.liveStreamEmojis.forEach((el, i) => {
             if (i >= 3) el.classList.add('fading');
         });
         
-        // Remove excess
         while (this.liveStreamEmojis.length > this.maxLiveEmojis) {
             const old = this.liveStreamEmojis.pop();
             old?.remove();
@@ -533,7 +658,6 @@ class MoodFlow {
         el.style.animationDuration = `${2.5 + Math.random() * 1.5}s`;
         
         container.appendChild(el);
-        
         setTimeout(() => el.remove(), 4000);
     }
     
