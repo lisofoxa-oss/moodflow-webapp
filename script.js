@@ -1,102 +1,184 @@
-// ========================================
-// MOODFLOW - Логика фронтенда
-// ========================================
+/**
+ * MoodFlow — Premium Frontend
+ * Real-time global mood statistics
+ */
 
-class MoodFlowApp {
+class MoodFlow {
     constructor() {
-        // URL бэкенда (полный, явно указанный)
+        // Backend URLs
         this.API_URL = 'https://moodflow-backend-production.up.railway.app';
         this.WS_URL = 'wss://moodflow-backend-production.up.railway.app';
         
-        // Эмодзи и их данные
-        this.emojis = {
-            '😀': { label: 'Отличное', color: '#4CAF50', gradient: 'linear-gradient(135deg, #4CAF50, #45a049)' },
-            '🙂': { label: 'Хорошее', color: '#8BC34A', gradient: 'linear-gradient(135deg, #8BC34A, #7CB342)' },
-            '😐': { label: 'Нормальное', color: '#FFC107', gradient: 'linear-gradient(135deg, #FFC107, #FFB300)' },
-            '🙁': { label: 'Плохое', color: '#FF9800', gradient: 'linear-gradient(135deg, #FF9800, #F57C00)' },
-            '😢': { label: 'Ужасное', color: '#F44336', gradient: 'linear-gradient(135deg, #F44336, #E53935)' }
+        // Mood configuration
+        this.moods = {
+            '😀': { label: { ru: 'Отличное', en: 'Great' }, color: '#10B981' },
+            '🙂': { label: { ru: 'Хорошее', en: 'Good' }, color: '#84CC16' },
+            '😐': { label: { ru: 'Нормальное', en: 'Neutral' }, color: '#F59E0B' },
+            '🙁': { label: { ru: 'Плохое', en: 'Bad' }, color: '#F97316' },
+            '😢': { label: { ru: 'Ужасное', en: 'Terrible' }, color: '#EF4444' }
         };
         
-        // Переводы
-        this.translations = {
+        this.moodOrder = ['😀', '🙂', '😐', '🙁', '😢'];
+        
+        // Translations
+        this.i18n = {
             ru: {
-                mostCommonMood: 'Самое частое настроение',
-                percentageSubtitle: 'ответов',
-                totalResponses: 'Всего ответов',
-                collectedToday: 'получено сегодня',
-                yesterdayTop: 'Вчера было',
-                yesterdayResponses: 'ответов',
+                tagline: 'Пульс настроений планеты',
+                chartTitle: 'Настроения сегодня',
+                responses: 'ответов',
                 livePulse: 'Прямой эфир',
-                latestMood: 'последнее настроение',
-                howItWorks: 'Как это работает',
-                howItWorksDesc: 'Люди со всего мира отвечают на простой вопрос о своём настроении. Их ответы создают эту глобальную карту счастья в реальном времени.',
-                todayVsYesterday: 'Сегодня vs Вчера',
-                volume: 'Объём',
-                dominantMood: 'Доминирующее настроение',
-                openInTelegram: 'Открыть в Telegram',
-                loading: 'Загрузка статистики...',
-                errorTitle: 'Ошибка',
-                errorDesc: 'Не удалось загрузить статистику. Пожалуйста, попробуйте позже.'
+                waiting: 'ожидание...',
+                topMood: 'Топ настроение',
+                ofTotal: 'от всех',
+                totalResponses: 'Всего ответов',
+                today: 'сегодня',
+                yesterday: 'Вчера',
+                trend: 'Тренд',
+                stable: 'стабильно',
+                growing: 'растёт',
+                declining: 'падает',
+                joinBot: 'Присоединиться к боту',
+                footerText: 'Люди со всего мира делятся настроением каждый день',
+                loading: 'Загружаем настроения мира...',
+                newMood: 'Новое настроение!',
+                connected: 'Подключено',
+                disconnected: 'Переподключение...'
             },
             en: {
-                mostCommonMood: 'Most Common Mood',
-                percentageSubtitle: 'of responses',
-                totalResponses: 'Total Responses',
-                collectedToday: 'collected today',
-                yesterdayTop: 'Yesterday\'s Top',
-                yesterdayResponses: 'responses',
+                tagline: 'Global mood pulse',
+                chartTitle: 'Today\'s moods',
+                responses: 'responses',
                 livePulse: 'Live Pulse',
-                latestMood: 'Latest mood',
-                howItWorks: 'How It Works',
-                howItWorksDesc: 'People around the world answer a simple question about their mood. Their responses create this global happiness map in real-time.',
-                todayVsYesterday: 'Today vs Yesterday',
-                volume: 'Volume',
-                dominantMood: 'Dominant Mood',
-                openInTelegram: 'Open in Telegram',
-                loading: 'Loading statistics...',
-                errorTitle: 'Error',
-                errorDesc: 'Failed to load statistics. Please try again later.'
+                waiting: 'waiting...',
+                topMood: 'Top Mood',
+                ofTotal: 'of total',
+                totalResponses: 'Total Responses',
+                today: 'today',
+                yesterday: 'Yesterday',
+                trend: 'Trend',
+                stable: 'stable',
+                growing: 'growing',
+                declining: 'declining',
+                joinBot: 'Join the bot',
+                footerText: 'People around the world share their mood every day',
+                loading: 'Loading world moods...',
+                newMood: 'New mood!',
+                connected: 'Connected',
+                disconnected: 'Reconnecting...'
             }
         };
         
-        this.currentLang = 'ru';
-        this.stats = null;
-        this.ws = null;
+        // State
+        this.lang = localStorage.getItem('moodflow-lang') || 'ru';
+        this.theme = localStorage.getItem('moodflow-theme') || 'dark';
         this.chart = null;
+        this.ws = null;
+        this.wsReconnectTimeout = null;
+        this.liveStreamEmojis = [];
+        this.maxLiveEmojis = 8;
         
         this.init();
     }
     
-    init() {
-        this.loadStats();
-        this.setupWebSocket();
+    async init() {
+        // Apply saved preferences
+        this.applyTheme(this.theme);
+        this.applyLanguage(this.lang);
+        this.setCurrentDate();
+        
+        // Setup event listeners
+        this.setupThemeToggle();
         this.setupLanguageToggle();
-        this.hideLoading();
+        
+        // Load data and connect
+        await this.loadStats();
+        this.setupWebSocket();
+        
+        // Hide loading screen
+        setTimeout(() => this.hideLoading(), 800);
+        
+        // Periodic refresh as fallback
+        setInterval(() => this.loadStats(), 30000);
     }
     
-    // Загрузка статистики
-    async loadStats() {
-        try {
-            const response = await fetch(`${this.API_URL}/api/stats`);
-            if (!response.ok) throw new Error('Failed to fetch stats');
-            
-            const data = await response.json();
-            this.stats = data;
-            this.updateUI(data);
-            
-        } catch (error) {
-            console.error('Error loading stats:', error);
-            this.showError();
+    // === Theme ===
+    applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        this.theme = theme;
+        localStorage.setItem('moodflow-theme', theme);
+    }
+    
+    setupThemeToggle() {
+        const btn = document.getElementById('theme-toggle');
+        btn?.addEventListener('click', () => {
+            const newTheme = this.theme === 'dark' ? 'light' : 'dark';
+            this.applyTheme(newTheme);
+        });
+    }
+    
+    // === Language ===
+    applyLanguage(lang) {
+        this.lang = lang;
+        localStorage.setItem('moodflow-lang', lang);
+        
+        const t = this.i18n[lang];
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (t[key]) el.textContent = t[key];
+        });
+        
+        document.getElementById('lang-label').textContent = lang.toUpperCase();
+        
+        // Update chart legend if exists
+        if (this.lastDistribution) {
+            this.updateChartLegend(this.lastDistribution);
         }
     }
     
-    // Настройка WebSocket
+    setupLanguageToggle() {
+        const btn = document.getElementById('lang-toggle');
+        btn?.addEventListener('click', () => {
+            const newLang = this.lang === 'ru' ? 'en' : 'ru';
+            this.applyLanguage(newLang);
+        });
+    }
+    
+    // === Date ===
+    setCurrentDate() {
+        const now = new Date();
+        const options = { day: 'numeric', month: 'short' };
+        const dateStr = now.toLocaleDateString(this.lang === 'ru' ? 'ru-RU' : 'en-US', options);
+        const dateEl = document.getElementById('chart-date');
+        if (dateEl) dateEl.textContent = dateStr;
+    }
+    
+    // === API ===
+    async loadStats() {
+        try {
+            const response = await fetch(`${this.API_URL}/api/stats`);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            
+            const data = await response.json();
+            this.updateUI(data);
+            return data;
+        } catch (error) {
+            console.error('Failed to load stats:', error);
+            return null;
+        }
+    }
+    
+    // === WebSocket ===
     setupWebSocket() {
+        if (this.ws?.readyState === WebSocket.OPEN) return;
+        
         try {
             this.ws = new WebSocket(this.WS_URL);
             
             this.ws.onopen = () => {
                 console.log('✅ WebSocket connected');
+                clearTimeout(this.wsReconnectTimeout);
+                
+                // Register as viewer
                 this.ws.send(JSON.stringify({
                     type: 'viewer_joined',
                     timestamp: Date.now()
@@ -104,18 +186,11 @@ class MoodFlowApp {
             };
             
             this.ws.onmessage = (event) => {
-                const data = JSON.parse(event.data);
-                
-                if (data.type === 'new_mood' && data.mood) {
-                    this.handleNewMood(data.mood);
-                }
-                
-                if (data.type === 'stats_update' && data.stats) {
-                    this.updateTodayStats(data.stats);
-                }
-                
-                if (data.type === 'viewers_count') {
-                    this.updateViewersCount(data.count || 0);
+                try {
+                    const data = JSON.parse(event.data);
+                    this.handleWSMessage(data);
+                } catch (e) {
+                    console.error('WS message parse error:', e);
                 }
             };
             
@@ -125,269 +200,337 @@ class MoodFlowApp {
             
             this.ws.onclose = () => {
                 console.log('WebSocket disconnected');
-                // Переподключение через 3 секунды
-                setTimeout(() => this.setupWebSocket(), 3000);
+                this.scheduleReconnect();
             };
             
         } catch (error) {
-            console.error('WebSocket setup error:', error);
-            // Если не удалось подключиться, используем поллинг
-            setInterval(() => this.loadStats(), 5000);
+            console.error('WebSocket setup failed:', error);
+            this.scheduleReconnect();
         }
     }
     
-    // Обработка нового настроения
-    handleNewMood(mood) {
-        // Создаём падающий эмодзи
-        this.createFallingEmoji(mood.emoji);
-        
-        // Обновляем последнее настроение
-        document.getElementById('latest-mood').textContent = mood.emoji;
-        
-        // Перезагружаем статистику
-        this.loadStats();
-    }
-    
-    // Создание падающего эмодзи
-    createFallingEmoji(emoji) {
-        const rain = document.getElementById('emoji-rain');
-        const element = document.createElement('div');
-        element.className = 'falling-emoji';
-        element.textContent = emoji;
-        element.style.left = `${Math.random() * 100}%`;
-        element.style.animationDuration = `${2 + Math.random() * 2}s`;
-        
-        rain.appendChild(element);
-        
-        setTimeout(() => {
-            element.remove();
+    scheduleReconnect() {
+        clearTimeout(this.wsReconnectTimeout);
+        this.wsReconnectTimeout = setTimeout(() => {
+            console.log('Attempting WebSocket reconnect...');
+            this.setupWebSocket();
         }, 3000);
     }
     
-    // Обновление интерфейса
-    updateUI(data) {
-        this.updateTodayStats(data.today);
-        this.updateYesterdayStats(data.yesterday);
-        this.updateChart(data.today.distribution);
-        this.updateComparison(data.today, data.yesterday);
-    }
-    
-    // Обновление статистики за сегодня
-    updateTodayStats(stats) {
-        document.getElementById('today-mood').textContent = stats.mostCommonEmoji || '😐';
-        document.getElementById('today-percentage').textContent = stats.percentage || 0;
-        document.getElementById('today-count').textContent = stats.count || 0;
-        
-        // Обновляем последнее настроение если есть
-        if (stats.lastResponse) {
-            document.getElementById('latest-mood').textContent = stats.lastResponse.emoji || '...';
+    handleWSMessage(data) {
+        switch (data.type) {
+            case 'new_mood':
+                if (data.mood?.emoji) {
+                    this.onNewMood(data.mood.emoji);
+                }
+                break;
+                
+            case 'stats_update':
+                if (data.stats) {
+                    this.updateTodayStats(data.stats);
+                }
+                break;
+                
+            case 'viewers_count':
+                this.updateViewersCount(data.count ?? 0);
+                break;
+                
+            case 'welcome':
+                // Server sends viewer count on connect
+                if (data.viewers !== undefined) {
+                    this.updateViewersCount(data.viewers);
+                }
+                break;
         }
     }
     
-    // Обновление статистики за вчера
-    updateYesterdayStats(stats) {
-        document.getElementById('yesterday-mood').textContent = stats.mostCommonEmoji || '😐';
-        document.getElementById('yesterday-count').textContent = stats.count || 0;
-        document.getElementById('yesterday-dominant').textContent = stats.mostCommonEmoji || '😐';
+    // === UI Updates ===
+    updateUI(data) {
+        if (!data) return;
+        
+        const today = data.today || {};
+        const yesterday = data.yesterday || {};
+        
+        // Today stats
+        this.updateTodayStats(today);
+        
+        // Yesterday stats
+        this.updateYesterdayStats(yesterday);
+        
+        // Chart
+        if (today.distribution) {
+            this.updateChart(today.distribution);
+            this.lastDistribution = today.distribution;
+        }
+        
+        // Trend
+        this.updateTrend(today, yesterday);
+        
+        // Last mood for live display
+        if (today.lastResponse?.emoji) {
+            this.setLiveEmoji(today.lastResponse.emoji);
+        }
     }
     
-    // Обновление диаграммы
-    updateChart(distribution) {
-        const ctx = document.getElementById('mood-chart').getContext('2d');
+    updateTodayStats(stats) {
+        // Top mood
+        const topMood = document.getElementById('top-mood');
+        const topPercent = document.getElementById('top-mood-percent');
+        if (topMood) topMood.textContent = stats.mostCommonEmoji || '😐';
+        if (topPercent) topPercent.textContent = stats.percentage || 0;
         
-        // Удаляем старую диаграмму если есть
+        // Total responses
+        const total = document.getElementById('total-responses');
+        const chartTotal = document.getElementById('chart-total');
+        if (total) total.textContent = this.formatNumber(stats.count || 0);
+        if (chartTotal) chartTotal.textContent = this.formatNumber(stats.count || 0);
+    }
+    
+    updateYesterdayStats(stats) {
+        const mood = document.getElementById('yesterday-mood');
+        const count = document.getElementById('yesterday-count');
+        if (mood) mood.textContent = stats.mostCommonEmoji || '😐';
+        if (count) count.textContent = this.formatNumber(stats.count || 0);
+    }
+    
+    updateViewersCount(count) {
+        const el = document.getElementById('viewers-count');
+        if (el) {
+            el.textContent = count > 0 ? count : '—';
+            el.parentElement?.classList.toggle('has-viewers', count > 0);
+        }
+    }
+    
+    updateTrend(today, yesterday) {
+        const arrow = document.getElementById('trend-arrow');
+        const text = document.getElementById('trend-text');
+        const comparison = document.getElementById('today-vs-yesterday');
+        
+        const todayCount = today.count || 0;
+        const yesterdayCount = yesterday.count || 0;
+        const diff = todayCount - yesterdayCount;
+        
+        if (arrow && text) {
+            if (diff > 0) {
+                arrow.textContent = '↗';
+                arrow.className = 'trend-arrow up';
+                text.textContent = this.i18n[this.lang].growing;
+            } else if (diff < 0) {
+                arrow.textContent = '↘';
+                arrow.className = 'trend-arrow down';
+                text.textContent = this.i18n[this.lang].declining;
+            } else {
+                arrow.textContent = '→';
+                arrow.className = 'trend-arrow stable';
+                text.textContent = this.i18n[this.lang].stable;
+            }
+        }
+        
+        if (comparison) {
+            const sign = diff > 0 ? '+' : '';
+            comparison.textContent = `${sign}${diff} vs ${this.i18n[this.lang].yesterday.toLowerCase()}`;
+        }
+    }
+    
+    // === Chart ===
+    updateChart(distribution) {
+        const ctx = document.getElementById('mood-chart')?.getContext('2d');
+        if (!ctx) return;
+        
+        // Prepare data
+        const labels = [];
+        const data = [];
+        const colors = [];
+        
+        this.moodOrder.forEach(emoji => {
+            const count = distribution[emoji] || 0;
+            labels.push(emoji);
+            data.push(count);
+            colors.push(this.moods[emoji].color);
+        });
+        
+        // Destroy old chart
         if (this.chart) {
             this.chart.destroy();
         }
         
-        const labels = [];
-        const data = [];
-        const colors = [];
-        const borderColors = [];
-        
-        // Сортируем эмодзи для консистентности
-        const emojiOrder = ['😀', '🙂', '😐', '🙁', '😢'];
-        
-        emojiOrder.forEach(emoji => {
-            const count = distribution[emoji] || 0;
-            if (count > 0) {
-                labels.push(`${this.emojis[emoji].label} (${count})`);
-                data.push(count);
-                colors.push(this.emojis[emoji].color);
-                borderColors.push(this.emojis[emoji].color);
-            }
-        });
-        
+        // Create new chart
         this.chart = new Chart(ctx, {
             type: 'doughnut',
-            data: {  // ← БЫЛО ПРОПУЩЕНО СЛОВО "data:"
+            data: {
                 labels: labels,
                 datasets: [{
-                    data: data,  // ← ИСПРАВЛЕНО: было "data,"
-                    backgroundColor: colors.map(c => c + '80'), // 50% прозрачность
-                    borderColor: borderColors,
-                    borderWidth: 2,
-                    hoverOffset: 15
+                    data: data,
+                    backgroundColor: colors.map(c => c + 'CC'), // 80% opacity
+                    borderColor: colors,
+                    borderWidth: 3,
+                    hoverOffset: 8,
+                    hoverBorderWidth: 4
                 }]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false,
+                maintainAspectRatio: true,
+                cutout: '70%',
                 plugins: {
-                    legend: {
-                        display: false
-                    },
+                    legend: { display: false },
                     tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                        enabled: true,
+                        backgroundColor: 'rgba(0, 0, 0, 0.85)',
                         titleColor: '#fff',
                         bodyColor: '#fff',
-                        borderColor: 'rgba(255, 255, 255, 0.1)',
-                        borderWidth: 1,
                         padding: 12,
+                        cornerRadius: 8,
+                        displayColors: true,
                         callbacks: {
-                            label: function(context) {
-                                const label = context.label || '';
-                                const value = context.raw || 0;
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = Math.round((value / total) * 100);
-                                return `${label}: ${percentage}%`;
+                            title: (items) => {
+                                const emoji = items[0]?.label || '';
+                                const mood = this.moods[emoji];
+                                return mood ? mood.label[this.lang] : emoji;
+                            },
+                            label: (item) => {
+                                const total = item.dataset.data.reduce((a, b) => a + b, 0);
+                                const percent = total > 0 ? Math.round((item.raw / total) * 100) : 0;
+                                return ` ${item.raw} (${percent}%)`;
                             }
                         }
                     }
                 },
-                cutout: '65%',
                 animation: {
                     animateRotate: true,
                     animateScale: true,
-                    duration: 1000
+                    duration: 800,
+                    easing: 'easeOutQuart'
                 },
                 interaction: {
                     mode: 'nearest',
-                    intersect: false
+                    intersect: true
                 }
             }
         });
         
-        // Обновляем легенду
+        // Update legend
         this.updateChartLegend(distribution);
     }
     
-    // Обновление легенды диаграммы
     updateChartLegend(distribution) {
         const legend = document.getElementById('chart-legend');
-        legend.innerHTML = '';
+        if (!legend) return;
         
-        const emojiOrder = ['😀', '🙂', '😐', '🙁', '😢'];
+        const total = Object.values(distribution).reduce((a, b) => a + b, 0);
         
-        emojiOrder.forEach(emoji => {
+        legend.innerHTML = this.moodOrder.map(emoji => {
             const count = distribution[emoji] || 0;
-            if (count > 0) {
-                const item = document.createElement('div');
-                item.className = 'chart-legend-item';
-                
-                const color = document.createElement('div');
-                color.className = 'chart-legend-color';
-                color.style.backgroundColor = this.emojis[emoji].color;
-                
-                const label = document.createElement('span');
-                label.textContent = `${emoji} ${this.emojis[emoji].label}: ${count}`;
-                
-                item.appendChild(color);
-                item.appendChild(label);
-                legend.appendChild(item);
-            }
-        });
+            const percent = total > 0 ? Math.round((count / total) * 100) : 0;
+            const mood = this.moods[emoji];
+            
+            return `
+                <div class="legend-item" style="--legend-color: ${mood.color}">
+                    <span class="legend-dot" style="background: ${mood.color}"></span>
+                    <span class="legend-emoji">${emoji}</span>
+                    <span class="legend-count">${count}</span>
+                </div>
+            `;
+        }).join('');
     }
     
-    // Обновление сравнения
-    updateComparison(today, yesterday) {
-        const todayCount = today.count || 0;
-        const yesterdayCount = yesterday.count || 0;
+    // === Live Updates ===
+    onNewMood(emoji) {
+        // Update live emoji display
+        this.setLiveEmoji(emoji);
         
-        document.getElementById('comparison-count').textContent = todayCount;
+        // Add to live stream
+        this.addToLiveStream(emoji);
         
-        // Тренд
-        const trend = document.getElementById('comparison-trend');
-        if (todayCount > yesterdayCount) {
-            trend.textContent = '▲';
-            trend.style.color = '#4CAF50';
-        } else if (todayCount < yesterdayCount) {
-            trend.textContent = '▼';
-            trend.style.color = '#F44336';
-        } else {
-            trend.textContent = '─';
-            trend.style.color = '#FFC107';
+        // Create floating emoji
+        this.createFloatingEmoji(emoji);
+        
+        // Show toast
+        this.showToast(emoji);
+        
+        // Refresh stats
+        this.loadStats();
+    }
+    
+    setLiveEmoji(emoji) {
+        const el = document.getElementById('live-emoji');
+        if (el) {
+            el.innerHTML = `<span class="emoji-pulse">${emoji}</span>`;
         }
-        
-        // Доминирующее настроение
-        document.getElementById('comparison-mood').textContent = today.mostCommonEmoji || '😐';
     }
     
-    // Обновление счётчика зрителей
-    updateViewersCount(count) {
-        document.getElementById('viewers-count').textContent = count;
-    }
-    
-    // Настройка переключения языка
-    setupLanguageToggle() {
-        const toggle = document.getElementById('lang-toggle');
-        const label = document.getElementById('lang-label');
+    addToLiveStream(emoji) {
+        const stream = document.getElementById('live-stream');
+        if (!stream) return;
         
-        toggle.addEventListener('click', () => {
-            this.currentLang = this.currentLang === 'ru' ? 'en' : 'ru';
-            label.textContent = this.currentLang.toUpperCase();
-            this.updateTranslations();
-        });
-    }
-    
-    // Обновление переводов
-    updateTranslations() {
-        const t = this.translations[this.currentLang];
+        // Add new emoji
+        const span = document.createElement('span');
+        span.className = 'live-stream-emoji';
+        span.textContent = emoji;
+        stream.insertBefore(span, stream.firstChild);
         
-        // Обновляем все элементы с атрибутом data-key
-        document.querySelectorAll('[data-key]').forEach(el => {
-            const key = el.getAttribute('data-key');
-            if (t[key]) {
-                el.textContent = t[key];
-            }
+        this.liveStreamEmojis.unshift(span);
+        
+        // Fade old emojis
+        this.liveStreamEmojis.forEach((el, i) => {
+            if (i >= 3) el.classList.add('fading');
         });
         
-        // Обновляем кнопку телеграма
-        const telegramLink = document.querySelector('.telegram-button');
-        telegramLink.innerHTML = `
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
-            </svg>
-            <span class="telegram-button-text">${t.openInTelegram}</span>
+        // Remove excess
+        while (this.liveStreamEmojis.length > this.maxLiveEmojis) {
+            const old = this.liveStreamEmojis.pop();
+            old?.remove();
+        }
+    }
+    
+    createFloatingEmoji(emoji) {
+        const container = document.getElementById('emoji-float-container');
+        if (!container) return;
+        
+        const el = document.createElement('div');
+        el.className = 'floating-emoji';
+        el.textContent = emoji;
+        el.style.left = `${10 + Math.random() * 80}%`;
+        el.style.animationDuration = `${2.5 + Math.random() * 1.5}s`;
+        
+        container.appendChild(el);
+        
+        setTimeout(() => el.remove(), 4000);
+    }
+    
+    showToast(emoji) {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+        
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = `
+            <span class="toast-emoji">${emoji}</span>
+            <span class="toast-text">${this.i18n[this.lang].newMood}</span>
         `;
-    }
-    
-    // Скрыть лоадер
-    hideLoading() {
+        
+        container.appendChild(toast);
+        
         setTimeout(() => {
-            document.getElementById('loading-overlay').classList.add('hidden');
-        }, 1000);
+            toast.classList.add('fade-out');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
     }
     
-    // Показать ошибку
-    showError() {
-        document.getElementById('loading-overlay').innerHTML = `
-            <div style="text-align: center; padding: 2rem;">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
-                <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">${this.translations[this.currentLang].errorTitle}</h2>
-                <p style="color: var(--muted-foreground); margin-top: 0.5rem;">${this.translations[this.currentLang].errorDesc}</p>
-                <button onclick="window.location.reload()" style="margin-top: 1.5rem; padding: 0.75rem 2rem; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Попробовать снова</button>
-            </div>
-        `;
+    // === Helpers ===
+    formatNumber(num) {
+        if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+        if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+        return num.toString();
+    }
+    
+    hideLoading() {
+        const loading = document.getElementById('loading-screen');
+        if (loading) loading.classList.add('hidden');
     }
 }
 
-// Инициализация приложения
+// Initialize app
 document.addEventListener('DOMContentLoaded', () => {
-    window.moodFlowApp = new MoodFlowApp();
-    
-    // Автообновление каждые 10 секунд
-    setInterval(() => {
-        window.moodFlowApp.loadStats();
-    }, 10000);
+    window.moodFlow = new MoodFlow();
 });

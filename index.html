@@ -1,173 +1,185 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MoodFlow - Глобальная статистика настроений</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MoodFlow — Пульс настроений мира</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Fredoka:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
+    <!-- Animated Background -->
+    <div class="bg-gradient"></div>
+    <div class="bg-noise"></div>
+    
+    <!-- Floating Emojis Container -->
+    <div class="emoji-float-container" id="emoji-float-container"></div>
+
+    <div class="app">
         <!-- Header -->
         <header class="header">
-            <div class="header-content">
-                <div class="title-section">
-                    <h1 class="main-title emoji-bounce">🌍 MoodFlow</h1>
-                    <p class="subtitle">Глобальная статистика настроений в реальном времени</p>
+            <div class="logo">
+                <span class="logo-icon">🌍</span>
+                <div class="logo-text">
+                    <h1>MoodFlow</h1>
+                    <p class="tagline" data-i18n="tagline">Пульс настроений планеты</p>
+                </div>
+            </div>
+            
+            <div class="header-controls">
+                <div class="live-indicator">
+                    <span class="live-dot"></span>
+                    <span class="live-text">LIVE</span>
                 </div>
                 
-                <div class="header-actions">
-                    <div class="viewers-badge glass-card">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="9" cy="7" r="4"></circle>
-                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                        </svg>
-                        <span class="viewers-count" id="viewers-count">0</span>
-                        <span class="viewers-label">смотрят</span>
-                    </div>
-                    
-                    <div class="language-switcher">
-                        <button id="lang-toggle" class="lang-btn glass-card">
-                            <span id="lang-label">RU</span>
-                        </button>
-                    </div>
+                <div class="viewers-pill" id="viewers-pill">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                    <span id="viewers-count">—</span>
                 </div>
+                
+                <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+                    <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"/>
+                        <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                    </svg>
+                    <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                    </svg>
+                </button>
+                
+                <button class="lang-toggle" id="lang-toggle">
+                    <span id="lang-label">RU</span>
+                </button>
             </div>
         </header>
 
-        <!-- Stats Grid -->
-        <div class="stats-grid">
-            <!-- Most Common Mood -->
-            <div class="stat-card glass-card pulse-card" style="--delay: 0.1s">
-				<div class="stat-icon">
-					<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
-						<path d="M8 12h8M9 9l-1-1M15 9l1-1M9 15l-1 1M15 15l1 1"></path>
-					</svg>
-				</div>
-                <h3 class="stat-title" data-key="mostCommonMood">Самое частое настроение</h3>
-                <div class="stat-value mood-display" id="today-mood">😐</div>
-                <div class="stat-subtitle">
-                    <span id="today-percentage">0</span>%
-                    <span class="stat-subtitle-label" data-key="percentageSubtitle">ответов</span>
-                </div>
-            </div>
-
-            <!-- Total Responses -->
-            <div class="stat-card glass-card pulse-card" style="--delay: 0.2s">
-                <div class="stat-icon">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
-                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="9" cy="7" r="4"></circle>
-                        <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                    </svg>
-                </div>
-                <h3 class="stat-title" data-key="totalResponses">Всего ответов</h3>
-                <div class="stat-value" id="today-count">0</div>
-                <div class="stat-subtitle" data-key="collectedToday">получено сегодня</div>
-            </div>
-
-            <!-- Yesterday's Top -->
-            <div class="stat-card glass-card pulse-card" style="--delay: 0.3s">
-                <div class="stat-icon">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                        <line x1="16" y1="2" x2="16" y2="6"></line>
-                        <line x1="8" y1="2" x2="8" y2="6"></line>
-                        <line x1="3" y1="10" x2="21" y2="10"></line>
-                    </svg>
-                </div>
-                <h3 class="stat-title" data-key="yesterdayTop">Вчера было</h3>
-                <div class="stat-value mood-display" id="yesterday-mood">😐</div>
-                <div class="stat-subtitle">
-                    <span id="yesterday-count">0</span>
-                    <span class="stat-subtitle-label" data-key="yesterdayResponses">ответов</span>
-                </div>
-            </div>
-
-            <!-- Live Pulse -->
-            <div class="stat-card glass-card pulse-card" style="--delay: 0.4s">
-                <div class="stat-icon">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
-                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                    </svg>
-                </div>
-                <h3 class="stat-title" data-key="livePulse">Прямой эфир</h3>
-                <div class="stat-value mood-display" id="latest-mood">...</div>
-                <div class="stat-subtitle" data-key="latestMood">последнее настроение</div>
-            </div>
-        </div>
-
         <!-- Main Content -->
-        <div class="main-content">
-            <!-- Chart Section -->
-            <div class="chart-section glass-card">
-                <div class="chart-header">
-                    <h2 class="chart-title">Распределение настроений сегодня</h2>
+        <main class="main">
+            <!-- Chart Section - First on Mobile -->
+            <section class="chart-section">
+                <div class="chart-card glass">
+                    <div class="chart-header">
+                        <h2 data-i18n="chartTitle">Настроения сегодня</h2>
+                        <div class="chart-date" id="chart-date"></div>
+                    </div>
+                    
+                    <div class="chart-wrapper">
+                        <div class="chart-container">
+                            <canvas id="mood-chart"></canvas>
+                            <div class="chart-center">
+                                <span class="chart-total" id="chart-total">0</span>
+                                <span class="chart-label" data-i18n="responses">ответов</span>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="chart-legend" id="chart-legend"></div>
                 </div>
-                <div class="chart-container">
-                    <canvas id="mood-chart"></canvas>
-                </div>
-            </div>
+            </section>
 
-            <!-- Info Section -->
-            <div class="info-section glass-card">
-                <div class="info-header">
-                    <h2 class="info-title" data-key="howItWorks">Как это работает</h2>
-                </div>
-                <p class="info-description" data-key="howItWorksDesc">
-                    Люди со всего мира отвечают на простой вопрос о своём настроении. 
-                    Их ответы создают эту глобальную карту счастья в реальном времени.
-                </p>
-
-                <div class="comparison-section">
-                    <h3 class="comparison-title" data-key="todayVsYesterday">Сегодня vs Вчера</h3>
-                    
-                    <div class="comparison-item">
-                        <span class="comparison-label" data-key="volume">Объём</span>
-                        <div class="comparison-value">
-                            <span id="comparison-count">0</span>
-                            <span class="comparison-trend" id="comparison-trend">▲</span>
-                        </div>
+            <!-- Stats Grid -->
+            <section class="stats-section">
+                <!-- Live Pulse Card -->
+                <div class="stat-card glass live-card">
+                    <div class="stat-header">
+                        <span class="stat-icon pulse-ring">⚡</span>
+                        <span class="stat-title" data-i18n="livePulse">Прямой эфир</span>
                     </div>
-                    
-                    <div class="comparison-item">
-                        <span class="comparison-label" data-key="dominantMood">Доминирующее настроение</span>
-                        <div class="comparison-value">
-                            <span id="comparison-mood">😐</span>
-                            <span class="comparison-vs">vs <span id="yesterday-dominant">😐</span></span>
-                        </div>
+                    <div class="live-emoji-display" id="live-emoji">
+                        <span class="waiting-text" data-i18n="waiting">ожидание...</span>
+                    </div>
+                    <div class="live-stream" id="live-stream"></div>
+                </div>
+
+                <!-- Top Mood Today -->
+                <div class="stat-card glass">
+                    <div class="stat-header">
+                        <span class="stat-icon">🏆</span>
+                        <span class="stat-title" data-i18n="topMood">Топ настроение</span>
+                    </div>
+                    <div class="stat-value emoji-large" id="top-mood">😐</div>
+                    <div class="stat-meta">
+                        <span id="top-mood-percent">0</span>% 
+                        <span data-i18n="ofTotal">от всех</span>
                     </div>
                 </div>
 
-                <div class="telegram-button-container">
-                    <a href="https://t.me/MoodFlowStatsBot" target="_blank" class="telegram-button">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
-                        </svg>
-                        <span class="telegram-button-text" data-key="openInTelegram">Открыть в Telegram</span>
-                    </a>
+                <!-- Total Responses -->
+                <div class="stat-card glass">
+                    <div class="stat-header">
+                        <span class="stat-icon">📊</span>
+                        <span class="stat-title" data-i18n="totalResponses">Всего ответов</span>
+                    </div>
+                    <div class="stat-value number" id="total-responses">0</div>
+                    <div class="stat-meta" data-i18n="today">сегодня</div>
                 </div>
+
+                <!-- Yesterday Comparison -->
+                <div class="stat-card glass">
+                    <div class="stat-header">
+                        <span class="stat-icon">📅</span>
+                        <span class="stat-title" data-i18n="yesterday">Вчера</span>
+                    </div>
+                    <div class="stat-value emoji-medium" id="yesterday-mood">😐</div>
+                    <div class="stat-meta">
+                        <span id="yesterday-count">0</span> 
+                        <span data-i18n="responses">ответов</span>
+                    </div>
+                </div>
+
+                <!-- Trend Card -->
+                <div class="stat-card glass trend-card">
+                    <div class="stat-header">
+                        <span class="stat-icon">📈</span>
+                        <span class="stat-title" data-i18n="trend">Тренд</span>
+                    </div>
+                    <div class="trend-display">
+                        <span class="trend-arrow" id="trend-arrow">→</span>
+                        <span class="trend-text" id="trend-text" data-i18n="stable">стабильно</span>
+                    </div>
+                    <div class="trend-comparison">
+                        <span id="today-vs-yesterday"></span>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <a href="https://t.me/MoodFlowStatsBot" target="_blank" class="telegram-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                </svg>
+                <span data-i18n="joinBot">Присоединиться к боту</span>
+            </a>
+            
+            <p class="footer-text" data-i18n="footerText">
+                Люди со всего мира делятся настроением каждый день
+            </p>
+        </footer>
+    </div>
+
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loading-screen">
+        <div class="loading-content">
+            <div class="loading-emoji">🌍</div>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
             </div>
-        </div>
-
-        <!-- Emoji Rain -->
-        <div class="emoji-rain" id="emoji-rain"></div>
-
-        <!-- Loading Overlay -->
-        <div class="loading-overlay" id="loading-overlay">
-            <div class="loading-spinner"></div>
-            <p class="loading-text" data-key="loading">Загрузка статистики...</p>
+            <p data-i18n="loading">Загружаем настроения мира...</p>
         </div>
     </div>
 
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
