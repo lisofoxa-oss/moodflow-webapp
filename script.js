@@ -219,12 +219,11 @@ class MoodFlow {
         this.emojiCursor.style.cssText = `
             position: fixed;
             pointer-events: none;
-            font-size: 32px;
+            font-size: 28px;
             opacity: 0;
-            transition: opacity 0.15s;
+            transition: opacity 0.1s;
             z-index: 9999;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-            transform: translate(-50%, -50%);
         `;
         document.body.appendChild(this.emojiCursor);
         
@@ -250,11 +249,11 @@ class MoodFlow {
             const index = points[0].index;
             const emoji = this.moodOrder[index];
             
-            // Show emoji cursor
+            // Show emoji cursor (slightly offset to top-right so it doesn't cover the pointer)
             this.emojiCursor.textContent = emoji;
             this.emojiCursor.style.opacity = '1';
-            this.emojiCursor.style.left = `${e.clientX}px`;
-            this.emojiCursor.style.top = `${e.clientY - 40}px`;
+            this.emojiCursor.style.left = `${e.clientX + 5}px`;
+            this.emojiCursor.style.top = `${e.clientY - 30}px`;
             
             // Hide default cursor on canvas
             e.target.style.cursor = 'none';
